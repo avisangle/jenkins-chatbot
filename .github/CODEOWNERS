@@ -1,5 +1,5 @@
 # Global code owners - all files will require approval from these users
-* @avisangle
+* @jenkinsci/@avisangle
 
 # Jenkins Plugin specific
 /jenkins-plugin/ @avisangle
@@ -26,5 +26,3 @@
 # Security and dependencies
 /.github/workflows/jenkins-security-scan.yml @avisangle
 /.github/dependabot.yml @avisangle
-
-* @jenkinsci/jenkins-chatbot-developers
