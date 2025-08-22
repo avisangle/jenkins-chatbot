@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: jenkins-chatbot-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-chatbot_redis_pass}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-chatbot_redis_pass}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: jenkins-chatbot-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-chatbot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chatbot_db_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-jenkins_chatbot}
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chatbot_user} -d ${POSTGRES_DB:-jenkins_chatbot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ai-agent:
+    build:
+      context: ./ai-agent
+      dockerfile: Dockerfile
+    container_name: jenkins-chatbot-ai-agent
+    environment:
+      # AI Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-pro}
+      JENKINS_USER: ${JENKINS_USER}
+      JENKINS_API_TOKEN: ${JENKINS_API_TOKEN}
+      
+      # MCP Server Integration (using script-based client)
+      # MCP_SERVER_SCRIPT_PATH and MCP_CLIENT_TIMEOUT are defined in config.py
+      
+      # Jenkins Integration
+      JENKINS_URL: ${JENKINS_URL}
+      JENKINS_WEBHOOK_SECRET: ${JENKINS_WEBHOOK_SECRET}
+      
+      # Database URLs
+      REDIS_URL: redis://:${REDIS_PASSWORD:-chatbot_redis_pass}@redis:6379/0
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-chatbot_user}:${POSTGRES_PASSWORD:-chatbot_db_pass}@postgres:5432/${POSTGRES_DB:-jenkins_chatbot}
+      
+      # Security
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-this}
+      
+      # Other settings
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENABLE_METRICS: ${ENABLE_METRICS:-true}
+      CHAT_SESSION_TIMEOUT: ${CHAT_SESSION_TIMEOUT:-900}
+      
+      # LLM-First Architecture (production default)
+      USE_LLM_FIRST_ARCHITECTURE: ${USE_LLM_FIRST_ARCHITECTURE:-true}
+      
+    ports:
+      - "8000:8000"
+      - "8091:8090"  # Metrics port
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mcp-server:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # MCP Server for Jenkins operations
+  mcp-server:
+    build:
+      context: ./ai-agent
+      dockerfile: Dockerfile
+    container_name: jenkins-chatbot-mcp-server
+    environment:
+      # Jenkins Integration
+      JENKINS_URL: ${JENKINS_URL:-http://localhost:8080}
+      JENKINS_USER: ${JENKINS_USER}
+      JENKINS_API_TOKEN: ${JENKINS_API_TOKEN}
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8010:8010"  # MCP server port
+    command: >
+      python jenkins_mcp_server_enhanced.py 
+      --transport streamable-http 
+      --host 0.0.0.0 
+      --port 8010
+    restart: unless-stopped
+
+
+  # Optional: Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: jenkins-chatbot-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    profiles:
+      - monitoring
+
+  # Optional: Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: jenkins-chatbot-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    profiles:
+      - monitoring
+
+volumes:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: jenkins-chatbot-network

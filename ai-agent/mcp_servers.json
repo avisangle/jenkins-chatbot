@@ -1,0 +1,24 @@
+{
+  "discovery_enabled": true,
+  "fallback_enabled": true,
+  "load_balancing": false,
+  "connection_pooling": true,
+  "cache_enabled": true,
+  "cache_ttl_seconds": 300,
+  "health_check_interval": 60,
+  "max_concurrent_connections": 10,
+  
+  "servers": [
+    {
+      "name": "jenkins-primary",
+      "url": "http://mcp-server:8010/mcp",
+      "transport": "http",
+      "priority": 1,
+      "timeout": 30,
+      "retry_count": 3,
+      "enabled": true,
+      "headers": {},
+      "auth_token": null
+    }
+  ]
+}

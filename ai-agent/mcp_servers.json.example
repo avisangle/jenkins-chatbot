@@ -1,0 +1,130 @@
+{
+  "_comment": "MCP Server Configuration - Copy to mcp_servers.json and customize",
+  "_schema": {
+    "discovery_enabled": "boolean - Enable automatic tool discovery across servers",
+    "fallback_enabled": "boolean - Enable automatic fallback to alternative servers/tools",
+    "load_balancing": "boolean - Distribute requests across servers (future feature)",
+    "connection_pooling": "boolean - Use connection pooling for better performance",
+    "cache_enabled": "boolean - Cache tool results and server responses",
+    "cache_ttl_seconds": "number - Cache time-to-live in seconds",
+    "health_check_interval": "number - Health check frequency in seconds",
+    "max_concurrent_connections": "number - Maximum concurrent connections per server",
+    "servers": "array - List of MCP server configurations"
+  },
+  
+  "discovery_enabled": true,
+  "fallback_enabled": true,
+  "load_balancing": false,
+  "connection_pooling": true,
+  "cache_enabled": true,
+  "cache_ttl_seconds": 300,
+  "health_check_interval": 60,
+  "max_concurrent_connections": 10,
+  
+  "servers": [
+    {
+      "_comment": "Primary Jenkins MCP Server - Main production server",
+      "name": "jenkins-primary",
+      "url": "http://mcp-server:8010/mcp",
+      "transport": "http",
+      "priority": 1,
+      "timeout": 30,
+      "retry_count": 3,
+      "enabled": true,
+      "headers": {},
+      "auth_token": null,
+      "_description": "Primary Jenkins MCP server with all 21 tools"
+    },
+    {
+      "_comment": "Backup Jenkins MCP Server - Fallback server (disabled by default)",
+      "name": "jenkins-backup",
+      "url": "http://mcp-backup:8011/mcp", 
+      "transport": "http",
+      "priority": 2,
+      "timeout": 30,
+      "retry_count": 2,
+      "enabled": false,
+      "headers": {},
+      "auth_token": null,
+      "_description": "Backup server for high availability"
+    },
+    {
+      "_comment": "WebSocket MCP Server - Alternative transport (disabled by default)",
+      "name": "jenkins-websocket",
+      "url": "ws://mcp-ws:8012/mcp",
+      "transport": "websocket",
+      "priority": 3,
+      "timeout": 25,
+      "retry_count": 2,
+      "enabled": false,
+      "headers": {
+        "Authorization": "Bearer your-websocket-token",
+        "User-Agent": "Jenkins-AI-Agent/1.0"
+      },
+      "auth_token": "optional_bearer_token_here",
+      "_description": "WebSocket-based MCP server for real-time communication"
+    },
+    {
+      "_comment": "Development MCP Server - For testing (disabled by default)",
+      "name": "jenkins-dev",
+      "url": "http://localhost:8010/mcp",
+      "transport": "http", 
+      "priority": 4,
+      "timeout": 15,
+      "retry_count": 1,
+      "enabled": false,
+      "headers": {
+        "X-Environment": "development"
+      },
+      "auth_token": null,
+      "_description": "Development server for testing new features"
+    },
+    {
+      "_comment": "External Jenkins MCP Server - Third-party server (disabled by default)", 
+      "name": "jenkins-external",
+      "url": "https://external-jenkins-mcp.example.com/mcp",
+      "transport": "http",
+      "priority": 5,
+      "timeout": 45,
+      "retry_count": 2,
+      "enabled": false,
+      "headers": {
+        "Authorization": "Bearer external-api-key",
+        "X-Client-ID": "jenkins-ai-agent",
+        "Accept": "application/json"
+      },
+      "auth_token": "external_service_token",
+      "_description": "External Jenkins MCP server with authentication"
+    }
+  ],
+
+  "_configuration_notes": {
+    "transport_types": [
+      "http - HTTP/HTTPS transport (most common)",
+      "websocket - WebSocket transport for real-time communication", 
+      "sse - Server-Sent Events (future)",
+      "stdio - Standard I/O (future)",
+      "unix - Unix socket (future)"
+    ],
+    "priority_system": "Lower numbers = higher priority (1 is highest priority)",
+    "enabled_servers": "Only enabled servers will be used for tool execution",
+    "fallback_behavior": "If primary server fails, system tries next enabled server by priority",
+    "authentication": "Use headers for HTTP auth, auth_token for bearer tokens",
+    "timeouts": "Timeout in seconds - adjust based on server response times",
+    "retry_behavior": "Number of retries before marking server as failed"
+  },
+
+  "_usage_examples": {
+    "single_server": "Enable only jenkins-primary for simple setup",
+    "high_availability": "Enable jenkins-primary and jenkins-backup for redundancy",
+    "development": "Enable jenkins-dev for local development and testing",
+    "multi_environment": "Configure different servers for dev/staging/prod environments",
+    "load_distribution": "Enable multiple servers with same priority for load distribution"
+  },
+
+  "_environment_variables": {
+    "MCP_CONFIG_FILE": "Override config file path (default: ./mcp_servers.json)",
+    "MCP_ENABLED": "Global enable/disable for MCP functionality", 
+    "Note": "Other MCP settings can be overridden via environment variables in .env file"
+  }
+}

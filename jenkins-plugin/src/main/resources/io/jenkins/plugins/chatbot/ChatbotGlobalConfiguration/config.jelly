@@ -1,0 +1,30 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler">
+  <f:section title="AI Chatbot Configuration">
+    
+    <f:entry title="Enable AI Chatbot" field="enableChatbot" description="Enable or disable the AI chatbot functionality system-wide">
+      <f:checkbox />
+    </f:entry>
+    
+    <f:entry title="AI Agent URL" field="aiAgentUrl" description="URL of the AI Agent service (e.g., http://localhost:8000)">
+      <f:textbox />
+    </f:entry>
+    
+    <f:validateButton title="Test Connection" progress="Testing..." method="checkAiAgentUrl" with="aiAgentUrl" />
+    
+    <f:entry title="Session Timeout (minutes)" field="sessionTimeoutMinutes" description="How long chat sessions remain active without activity (1-1440 minutes)">
+      <f:number min="1" max="1440" />
+    </f:entry>
+    
+    <f:entry title="Webhook Secret" field="webhookSecret" description="Secret key for secure webhook communication (optional)">
+      <f:password />
+    </f:entry>
+    
+    <f:advanced>
+      <f:entry title="Debug Mode" field="debugMode" description="Enable detailed logging for troubleshooting">
+        <f:checkbox />
+      </f:entry>
+    </f:advanced>
+    
+  </f:section>
+</j:jelly>

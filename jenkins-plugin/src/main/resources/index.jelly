@@ -1,0 +1,5 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Jenkins AI Chatbot Plugin provides an intelligent conversational interface for Jenkins automation.
+    Chat with AI to manage builds, deployments, and system operations through natural language.
+</div>
