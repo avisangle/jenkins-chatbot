@@ -20,4 +20,4 @@ flake8==6.1.0
 mypy==1.7.1
 
 # Development server
-watchdog==3.0.0
+watchdog==6.0.0
