@@ -1,0 +1,69 @@
+version: 2
+updates:
+  # Enable version updates for Maven (Jenkins Plugin)
+  - package-ecosystem: "maven"
+    directory: "/jenkins-plugin"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "avisangle"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "java"
+
+  # Enable version updates for pip (AI Agent)
+  - package-ecosystem: "pip"
+    directory: "/ai-agent"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "avisangle"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "avisangle"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"  
+      time: "06:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "avisangle"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"

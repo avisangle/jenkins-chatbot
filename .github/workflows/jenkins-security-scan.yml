@@ -1,0 +1,66 @@
+name: Jenkins Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    # Run weekly security scans
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  security-scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Run Maven security scan
+      working-directory: jenkins-plugin
+      run: |
+        mvn clean compile
+        mvn org.owasp:dependency-check-maven:check
+        
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java
+        
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+      
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      
+    - name: Upload dependency check results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dependency-check-report
+        path: jenkins-plugin/target/dependency-check-report.html
+        retention-days: 30
