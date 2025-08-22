@@ -1,5 +1,5 @@
 # Global code owners - all files will require approval from these users
-* @jenkinsci/@avisangle
+* @avisangle
 
 # Jenkins Plugin specific
 /jenkins-plugin/ @avisangle
