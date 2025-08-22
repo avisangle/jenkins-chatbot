@@ -18,7 +18,7 @@
 
     <name>Jenkins AI Chatbot Plugin</name>
     <description>AI-powered chatbot for Jenkins with natural language interface</description>
-    <url>https://github.com/avisangle/jenkins-chatbot</url>
+    <url>https://github.com/avisangle/jenkins-chatbot-plugin</url>
 
     <licenses>
         <license>
@@ -36,15 +36,15 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/avisangle/jenkins-chatbot.git</connection>
-        <developerConnection>scm:git:https://github.com/avisangle/jenkins-chatbot.git</developerConnection>
-        <url>https://github.com/avisangle/jenkins-chatbot</url>
+        <connection>scm:git:https://github.com/avisangle/jenkins-chatbot-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/avisangle/jenkins-chatbot-plugin.git</developerConnection>
+        <url>https://github.com/avisangle/jenkins-chatbot-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/avisangle/jenkins-chatbot/issues</url>
+        <url>https://github.com/avisangle/jenkins-chatbot-plugin/issues</url>
     </issueManagement>
 
     <properties>
